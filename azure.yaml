@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: azure-document-translator
+metadata:
+  template: azure-document-translator@0.1.0
+services:
+  web:
+    project: .
+    language: ts
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+      # Build the image in Azure Container Registry instead of on the local
+      # machine, so a local Docker/Podman runtime isn't required to deploy.
+      remoteBuild: true

@@ -1,0 +1,90 @@
+{
+  "generatedAt": "2026-06-22T12:00:08.581Z",
+  "sourceLanguage": "ja",
+  "targetLanguage": "en",
+  "layoutApiVersion": "2026-03-01",
+  "translateTextWithinImage": true,
+  "resource": "https://cog-<token>.cognitiveservices.azure.com/",
+  "documents": [
+    {
+      "file": "016_05_00.pdf",
+      "sizeBytes": 1343794,
+      "pages": 14,
+      "sourceChars": 13690,
+      "sourceJapaneseChars": 5747,
+      "textView": {
+        "residualJapaneseChars": 0,
+        "coverage": 1,
+        "translatedChars": 31469
+      },
+      "layout": {
+        "ok": true,
+        "outBytes": 6184713,
+        "charactersCharged": 15941,
+        "residualJa": 0,
+        "coverage": 1,
+        "sampleResidual": []
+      }
+    },
+    {
+      "file": "2023_01benchmark.pdf",
+      "sizeBytes": 1163022,
+      "pages": 19,
+      "sourceChars": 12187,
+      "sourceJapaneseChars": 9309,
+      "textView": {
+        "residualJapaneseChars": 4,
+        "coverage": 0.999570308303792,
+        "translatedChars": 30061
+      },
+      "layout": {
+        "ok": true,
+        "outBytes": 4767945,
+        "charactersCharged": 19722,
+        "residualJa": 0,
+        "coverage": 1,
+        "sampleResidual": []
+      }
+    },
+    {
+      "file": "maizou_kijun.pdf",
+      "sizeBytes": 587135,
+      "pages": 13,
+      "sourceChars": 11132,
+      "sourceJapaneseChars": 9649,
+      "textView": {
+        "residualJapaneseChars": 0,
+        "coverage": 1,
+        "translatedChars": 34735
+      },
+      "layout": {
+        "ok": true,
+        "outBytes": 1425104,
+        "charactersCharged": 18411,
+        "residualJa": 0,
+        "coverage": 1,
+        "sampleResidual": []
+      }
+    },
+    {
+      "file": "sankou1-1.pdf",
+      "sizeBytes": 472482,
+      "pages": 2,
+      "sourceChars": 1886,
+      "sourceJapaneseChars": 1542,
+      "textView": {
+        "residualJapaneseChars": 0,
+        "coverage": 1,
+        "translatedChars": 6015
+      },
+      "layout": {
+        "ok": true,
+        "outBytes": 1036481,
+        "charactersCharged": 3485,
+        "residualJa": 0,
+        "coverage": 1,
+        "sampleResidual": []
+      }
+    }
+  ]
+}

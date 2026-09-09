@@ -1,0 +1,19 @@
+{
+  "file": "sample-24page-ja.pdf",
+  "pages": 24,
+  "images": [
+    {
+      "page": 2,
+      "name": "/Im1",
+      "widthPx": 2999,
+      "heightPx": 2120,
+      "megapixels": 6.36,
+      "bytesKB": 718.3,
+      "displayedWidthPt": 1062.5,
+      "displayedHeightPt": 751.2,
+      "pageCoveragePct": 79.59,
+      "pageWidthPt": 842,
+      "pageHeightPt": 1191
+    }
+  ]
+}

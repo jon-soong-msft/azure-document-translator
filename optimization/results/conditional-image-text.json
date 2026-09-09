@@ -1,0 +1,143 @@
+{
+  "generatedAt": "2026-07-02T11:13:25.659Z",
+  "file": "sample-24page-ja.pdf",
+  "totalPages": 24,
+  "pagesPerChunk": 3,
+  "chunkCount": 8,
+  "detection": {
+    "method": "pdf-lib XObject traversal (recurses Form XObjects), deduped by object ref",
+    "totalImageXObjectsEnumerated": 1,
+    "pagesWithImages": 1,
+    "note": "Inline images (BI/ID/EI) are not counted; scanned PDFs use XObjects."
+  },
+  "chunks": [
+    {
+      "chunk": 0,
+      "pages": "1-3",
+      "images": 1,
+      "imageBytes": 735489,
+      "pagesWithImages": [
+        2
+      ],
+      "hasImages": true,
+      "onMs": 62872.59730000001,
+      "offMs": 44019.9356,
+      "onChars": 20801,
+      "offChars": 17199
+    },
+    {
+      "chunk": 1,
+      "pages": "4-6",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 159408.70440000002,
+      "offMs": 44019.943400000004,
+      "onChars": 35621,
+      "offChars": 24621
+    },
+    {
+      "chunk": 2,
+      "pages": "7-9",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 81874.7306,
+      "offMs": 39182.525200000004,
+      "onChars": 27738,
+      "offChars": 20995
+    },
+    {
+      "chunk": 3,
+      "pages": "10-12",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 109116.7645,
+      "offMs": 44019.943199999994,
+      "onChars": 55033,
+      "offChars": 45990
+    },
+    {
+      "chunk": 4,
+      "pages": "13-15",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 86333.33829999999,
+      "offMs": 48734.423899999994,
+      "onChars": 48520,
+      "offChars": 42310
+    },
+    {
+      "chunk": 5,
+      "pages": "16-18",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 534342.0457,
+      "offMs": 39182.525799999996,
+      "onChars": 59284,
+      "offChars": 39259
+    },
+    {
+      "chunk": 6,
+      "pages": "19-21",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 284097.8357,
+      "offMs": 48734.4275,
+      "onChars": 49203,
+      "offChars": 45169
+    },
+    {
+      "chunk": 7,
+      "pages": "22-24",
+      "images": 0,
+      "imageBytes": 0,
+      "pagesWithImages": [],
+      "hasImages": false,
+      "onMs": 68104.8456,
+      "offMs": 19636.177600000003,
+      "onChars": 21156,
+      "offChars": 21458
+    }
+  ],
+  "imageChunkIndexes": [
+    0
+  ],
+  "textChunkIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "model": {
+    "fixedOverheadMs": 21571.736799999955,
+    "onWallMs": 555913.7825,
+    "offWallMs": 63536.3016,
+    "condWallMs": 84444.33409999996,
+    "onMaxChunkMs": 534342.0457,
+    "condMaxChunkMs": 62872.59730000001,
+    "onCriticalChunk": 5,
+    "condCriticalChunk": 0
+  },
+  "cost": {
+    "onChars": 317356,
+    "offChars": 257001,
+    "condChars": 260603,
+    "onUSD": 4.7603,
+    "offUSD": 3.855,
+    "condUSD": 3.909
+  }
+}

@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Translation pipeline perf trace - 016_05_00.pdf</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#131a2e; --panel2:#0f1526; --line:#243149; --ink:#e6ecf7;
+    --muted:#93a2c0; --total:#64748b; --phase:#a855f7; --activity:#3b82f6; --task:#14b8a6; --azure:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1020,#0a0e1c);color:var(--ink);
+    font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+  h1{font-size:20px;margin:0 0 4px} h2{font-size:15px;margin:26px 0 10px;color:#c8d4ea}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .cfg{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12px;color:#c8d4ea}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:8px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .v{font-size:22px;font-weight:650} .kpi .l{color:var(--muted);font-size:12px;margin-top:3px}
+  .kpi.warn .v{color:var(--azure)} .kpi.good .v{color:#34d399}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 14px;color:var(--muted);font-size:12px}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .gaxis{position:relative;height:16px;margin-left:150px;color:var(--muted);font-size:11px}
+  .gaxis .t{position:absolute;transform:translateX(-50%)}
+  .gwrap{display:flex}
+  .glabels{width:150px;flex:none}
+  .glabel{height:30px;display:flex;align-items:center;font-size:12px;color:#c8d4ea;
+    border-top:1px solid var(--line);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .glabel.grp{color:#8ea3c9;font-weight:600}
+  .gplot{position:relative;flex:1;border-left:1px solid var(--line)}
+  .grid{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.05)}
+  .lanebg{position:absolute;left:0;right:0;height:30px;border-top:1px solid var(--line)}
+  .bar{position:absolute;height:22px;min-width:2px;border-radius:4px;top:4px;overflow:hidden;
+    font-size:10px;line-height:22px;color:#04122b;padding:0 5px;white-space:nowrap;cursor:default}
+  .bar.total{background:var(--total);color:#e6ecf7} .bar.phase{background:var(--phase);color:#f6ecff}
+  .bar.activity{background:var(--activity);color:#eaf1ff} .bar.task{background:var(--task)}
+  .bar.azure{background:var(--azure)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+  th{color:#9db0d4;font-weight:600;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--panel)}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tr:hover td{background:rgba(255,255,255,.03)}
+  .pill{font-size:10px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:#c8d4ea}
+  .tag{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .foot{color:var(--muted);font-size:11.5px;margin-top:18px}
+  .tblwrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Translation pipeline - performance trace</h1>
+  <div class="sub" id="sub"></div>
+  <div class="cfg" id="cfg"></div>
+
+  <h2>Summary</h2>
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Threads &amp; traces (waterfall)</h2>
+  <div class="panel">
+    <div class="legend">
+      <span><i style="background:var(--total)"></i>wall clock</span>
+      <span><i style="background:var(--phase)"></i>phase</span>
+      <span><i style="background:var(--activity)"></i>activity (main)</span>
+      <span><i style="background:var(--task)"></i>task</span>
+      <span><i style="background:var(--azure)"></i>azure translation</span>
+    </div>
+    <div class="gaxis" id="gaxis"></div>
+    <div class="gwrap">
+      <div class="glabels" id="glabels"></div>
+      <div class="gplot" id="gplot"></div>
+    </div>
+  </div>
+
+  <h2>Per-chunk breakdown</h2>
+  <div class="tblwrap"><table id="chunkTbl"></table></div>
+
+  <h2>All spans</h2>
+  <div class="tblwrap"><table id="spanTbl"></table></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script id="trace-data" type="application/json">{"generatedAt":"2026-07-02T12:15:30.754Z","wallStart":"2026-07-02T12:12:05.781Z","config":{"file":"016_05_00.pdf","label":"016_05_00","fileBytes":1343794,"pagesPerChunk":3,"imageText":true,"apiVersion":"2026-03-01","to":"en","from":"ja","totalPages":14,"chunkCount":5,"charactersCharged":15941,"costUSD":0.2391,"outputBytes":5084021,"mergedPages":14,"pollRounds":5,"downloadSeqMs":55809,"downloadParMs":90348,"validPdf":true,"endpoint":"https://cog-<token>.cognitiveservices.azure.com"},"spans":[{"thread":"total","cat":"total","name":"wall-clock","meta":{"file":"016_05_00.pdf","pagesPerChunk":3,"imageText":true,"apiVersion":"2026-03-01","to":"en","from":"ja","fileBytes":1343794,"totalPages":14,"chunkCount":5,"charactersCharged":15941,"outputBytes":5084021,"mergedPages":14,"failedChunks":0,"validPdf":true},"t0":13.265200000000277,"t1":204972.7812,"dur":204959.516},{"thread":"main","cat":"activity","name":"read-file","meta":{},"t0":13.373700000000099,"t1":25.990600000000086,"dur":12.616899999999987},{"thread":"main","cat":"activity","name":"auth-token","meta":{},"t0":26.556500000000142,"t1":5948.262000000001,"dur":5921.7055},{"thread":"main","cat":"activity","name":"split-pdf","meta":{"total":14,"chunkCount":5},"t0":5948.4503,"t1":6244.0187000000005,"dur":295.5684000000001},{"thread":"main","cat":"task","name":"split p1-3","meta":{"p0":0,"n":3,"bytes":378531},"t0":5986.4185,"t1":6068.5151000000005,"dur":82.09660000000076},{"thread":"main","cat":"task","name":"split p4-6","meta":{"p0":3,"n":3,"bytes":272304},"t0":6068.5949,"t1":6129.9432,"dur":61.348299999999654},{"thread":"main","cat":"task","name":"split p7-9","meta":{"p0":6,"n":3,"bytes":566283},"t0":6129.987300000001,"t1":6163.0821,"dur":33.09479999999894},{"thread":"main","cat":"task","name":"split p10-12","meta":{"p0":9,"n":3,"bytes":393562},"t0":6163.1546,"t1":6186.8385,"dur":23.683899999999994},{"thread":"main","cat":"task","name":"split p13-14","meta":{"p0":12,"n":2,"bytes":217208},"t0":6186.8809,"t1":6243.853000000001,"dur":56.972100000000864},{"thread":"phase","cat":"phase","name":"A: submit (startPdfBatchJob)","meta":{},"t0":6245.130999999999,"t1":27882.572099999998,"dur":21637.441099999996},{"thread":"chunk-0","cat":"task","name":"upload-blob","meta":{"bytes":378531,"pages":3},"t0":6245.522800000001,"t1":25377.3954,"dur":19131.872600000002},{"thread":"chunk-1","cat":"task","name":"upload-blob","meta":{"bytes":272304,"pages":3},"t0":6248.171200000001,"t1":20862.7975,"dur":14614.6263},{"thread":"chunk-2","cat":"task","name":"upload-blob","meta":{"bytes":566283,"pages":3},"t0":6248.773300000001,"t1":26956.7123,"dur":20707.939},{"thread":"chunk-3","cat":"task","name":"upload-blob","meta":{"bytes":393562,"pages":3},"t0":6249.008100000001,"t1":19004.231200000002,"dur":12755.223100000001},{"thread":"chunk-4","cat":"task","name":"upload-blob","meta":{"bytes":217208,"pages":2},"t0":6249.1275000000005,"t1":23886.050799999997,"dur":17636.923299999995},{"thread":"chunk-3","cat":"task","name":"submit-batch","meta":{"pages":3},"t0":19004.251600000003,"t1":22313.692499999997,"dur":3309.440899999994},{"thread":"chunk-1","cat":"task","name":"submit-batch","meta":{"pages":3},"t0":20862.815300000002,"t1":22945.2851,"dur":2082.469799999999},{"thread":"chunk-4","cat":"task","name":"submit-batch","meta":{"pages":2},"t0":23886.0645,"t1":24879.345,"dur":993.2805000000008},{"thread":"chunk-0","cat":"task","name":"submit-batch","meta":{"pages":3},"t0":25377.4067,"t1":25926.975100000003,"dur":549.5684000000037},{"thread":"chunk-2","cat":"task","name":"submit-batch","meta":{"pages":3},"t0":26956.723599999998,"t1":27882.5481,"dur":925.8245000000024},{"thread":"chunk-0","cat":"azure","name":"process-azure","meta":{"pages":3,"status":"succeeded","chars":2301},"t0":27883.2929,"t1":49541.8721,"dur":21658.5792},{"thread":"chunk-1","cat":"azure","name":"process-azure","meta":{"pages":3,"status":"succeeded","chars":3781},"t0":27883.297599999998,"t1":39016.4484,"dur":11133.150800000003},{"thread":"chunk-2","cat":"azure","name":"process-azure","meta":{"pages":3,"status":"succeeded","chars":5078},"t0":27883.2995,"t1":56267.7598,"dur":28384.4603},{"thread":"chunk-3","cat":"azure","name":"process-azure","meta":{"pages":3,"status":"succeeded","chars":2997},"t0":27883.3013,"t1":39016.4809,"dur":11133.179600000003},{"thread":"chunk-4","cat":"azure","name":"process-azure","meta":{"pages":2,"status":"succeeded","chars":1784},"t0":27883.303099999997,"t1":39016.5405,"dur":11133.237400000005},{"thread":"phase","cat":"phase","name":"B: poll (getPdfJobStatus)","meta":{"rounds":5},"t0":27883.3143,"t1":56269.0017,"dur":28385.687400000003},{"thread":"phase","cat":"phase","name":"C: download+merge (finishPdfBatchJob)","meta":{"seqMs":55809.4313,"parMs":90347.70730000001},"t0":56269.016,"t1":203605.0508,"dur":147336.0348},{"thread":"main","cat":"activity","name":"download-sequential (/result today)","meta":{"bytes":6936225,"chunks":5},"t0":56269.187900000004,"t1":112078.6192,"dur":55809.4313},{"thread":"chunk-0","cat":"task","name":"download-blob","meta":{},"t0":56269.197,"t1":74540.1687,"dur":18270.971699999995},{"thread":"chunk-1","cat":"task","name":"download-blob","meta":{},"t0":74540.19649999999,"t1":88671.17529999999,"dur":14130.978799999997},{"thread":"chunk-2","cat":"task","name":"download-blob","meta":{},"t0":88671.2416,"t1":107965.72649999999,"dur":19294.484899999996},{"thread":"chunk-3","cat":"task","name":"download-blob","meta":{},"t0":107965.7546,"t1":110059.5321,"dur":2093.7774999999965},{"thread":"chunk-4","cat":"task","name":"download-blob","meta":{},"t0":110059.564,"t1":112078.3974,"dur":2018.8334000000032},{"thread":"main","cat":"activity","name":"download-parallel (proposed fix)","meta":{"bytes":6936225,"chunks":5},"t0":112078.6414,"t1":202426.3487,"dur":90347.70730000001},{"thread":"main","cat":"activity","name":"merge-pdfs","meta":{"count":5},"t0":202426.5922,"t1":203604.96670000002,"dur":1178.3745000000054},{"thread":"main","cat":"activity","name":"write-output","meta":{"bytes":5084021},"t0":203621.53290000002,"t1":203651.53960000002,"dur":30.00669999999809},{"thread":"main","cat":"activity","name":"cleanup-blobs","meta":{},"t0":203651.55120000002,"t1":204928.84050000002,"dur":1277.289300000004}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('trace-data').textContent);
+const C = DATA.config, S = DATA.spans;
+const COL = {total:'var(--total)',phase:'var(--phase)',activity:'var(--activity)',task:'var(--task)',azure:'var(--azure)'};
+const totalMs = Math.max.apply(null, S.map(s=>s.t1||0));
+
+function fmtDur(ms){ if(ms==null) return '-'; if(ms<1000) return Math.round(ms)+'ms';
+  const s=ms/1000; if(s<60) return s.toFixed(1)+'s'; const m=Math.floor(s/60); return m+'m'+Math.round(s-m*60)+'s'; }
+function fmtClock(ms){ const s=Math.floor(ms/1000), m=Math.floor(s/60);
+  return String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function mb(b){ return (b/1048576).toFixed(2)+' MB'; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function metaStr(m){ return Object.keys(m||{}).filter(k=>k!=='error')
+  .map(k=>k+'='+(typeof m[k]==='number'?m[k].toLocaleString():m[k])).join('  '); }
+
+// ---- header / config ----
+document.getElementById('sub').textContent =
+  C.file+'  -  '+mb(C.fileBytes)+', '+C.totalPages+' pages  -  run '+new Date(DATA.wallStart).toLocaleString();
+const cfg = [['pages/chunk',C.pagesPerChunk],['chunks',C.chunkCount],['image-text',C.imageText?'ON':'off'],
+  ['api',C.apiVersion],['route',C.from+' -> '+C.to],['poll rounds',C.pollRounds]];
+document.getElementById('cfg').innerHTML = cfg.map(([k,v])=>'<span class="chip">'+k+': <b>'+esc(v)+'</b></span>').join('');
+
+// ---- KPIs ----
+const wall = S.find(s=>s.thread==='total');
+const azure = S.filter(s=>s.cat==='azure');
+const slow = azure.reduce((a,b)=>(b.dur>a.dur?b:a), azure[0]||{dur:0});
+const fast = azure.reduce((a,b)=>(b.dur<a.dur?b:a), azure[0]||{dur:0});
+const avgAz = azure.length? azure.reduce((a,b)=>a+b.dur,0)/azure.length : 0;
+const find = n => S.find(s=>s.thread==='main'&&s.name===n) || {dur:0};
+const phase = n => S.find(s=>s.thread==='phase'&&s.name.indexOf(n)===0) || {dur:0};
+const kpis = [
+  ['wall clock', fmtDur(wall?.dur), 'total', 'good'],
+  ['split', fmtDur(find('split-pdf').dur), C.chunkCount+' chunks',''],
+  ['submit phase', fmtDur(phase('A').dur), 'upload + POST',''],
+  ['poll phase', fmtDur(phase('B').dur), C.pollRounds+' rounds x 4s',''],
+  ['download+merge', fmtDur(phase('C').dur), '',''],
+  ['/result download', fmtDur(C.downloadSeqMs)+' seq', 'vs '+fmtDur(C.downloadParMs)+' parallel','warn'],
+  ['slowest chunk', fmtDur(slow.dur), 'chunk-'+(azure.indexOf(slow))+' (critical path)','warn'],
+  ['fastest chunk', fmtDur(fast.dur), '',''],
+  ['avg chunk', fmtDur(avgAz), 'Azure translate',''],
+  ['characters', (C.charactersCharged||0).toLocaleString(), 'US$'+C.costUSD,''],
+  ['output', mb(C.outputBytes), (C.mergedPages||'?')+' pages',''],
+];
+document.getElementById('kpis').innerHTML = kpis.map(([l,v,s,cl])=>
+  '<div class="kpi '+(cl||'')+'"><div class="v">'+esc(v)+'</div><div class="l">'+esc(l)+
+  (s?' &middot; '+esc(s):'')+'</div></div>').join('');
+
+// ---- waterfall ----
+const order = ['total','phase','main'];
+const chunkThreads = [...new Set(S.map(s=>s.thread))].filter(t=>t.indexOf('chunk-')===0)
+  .sort((a,b)=>(+a.split('-')[1])-(+b.split('-')[1]));
+const threads = order.filter(t=>S.some(s=>s.thread===t)).concat(chunkThreads);
+const ROW=30;
+const labels = document.getElementById('glabels');
+const plot = document.getElementById('gplot');
+plot.style.height = threads.length*ROW+'px';
+labels.innerHTML = threads.map(t=>'<div class="glabel'+(t==='total'?' grp':'')+'">'+esc(t)+'</div>').join('');
+
+// gridlines + axis
+const steps=[5,10,15,30,60,120,300,600];
+let step=steps[steps.length-1];
+for(const s of steps){ if(totalMs/1000/s<=12){ step=s; break; } }
+let axis='', grid='';
+for(let t=0;t<=totalMs/1000;t+=step){
+  const x=(t*1000/totalMs)*100;
+  axis+='<div class="t" style="left:'+x+'%">'+fmtClock(t*1000)+'</div>';
+  grid+='<div class="grid" style="left:'+x+'%"></div>';
+}
+document.getElementById('gaxis').innerHTML=axis;
+
+let bars=grid;
+threads.forEach((t,i)=>{ bars+='<div class="lanebg" style="top:'+(i*ROW)+'px"></div>'; });
+S.forEach(s=>{
+  const i=threads.indexOf(s.thread); if(i<0||s.t1==null) return;
+  const l=(s.t0/totalMs)*100, w=Math.max((s.dur/totalMs)*100,0.15);
+  const tip=s.thread+' | '+s.cat+' | '+s.name+'\n'+fmtClock(s.t0)+' -> '+fmtClock(s.t1)+
+    '  (dur '+fmtDur(s.dur)+')'+(metaStr(s.meta)?'\n'+metaStr(s.meta):'')+
+    (s.meta&&s.meta.error?'\nERROR: '+s.meta.error:'');
+  const label=(s.dur/totalMs>0.05)?esc(s.name):'';
+  bars+='<div class="bar '+s.cat+'" style="left:'+l+'%;width:'+w+'%;top:'+(i*ROW+4)+'px" title="'+esc(tip)+'">'+label+'</div>';
+});
+plot.innerHTML=bars;
+
+// ---- per-chunk table ----
+const chunkRows = chunkThreads.map(t=>{
+  const i=+t.split('-')[1];
+  const g=n=>S.find(s=>s.thread===t&&s.name===n)||{};
+  const up=g('upload-blob'), sub=g('submit-batch'), az=g('process-azure'), dl=g('download-blob');
+  return {i,pages:az.meta?.pages,up:up.dur,sub:sub.dur,az:az.dur,dl:dl.dur,
+    chars:az.meta?.chars,status:az.meta?.status,dlbytes:dl.meta?.bytes};
+});
+const maxAz = Math.max.apply(null, chunkRows.map(r=>r.az||0));
+document.getElementById('chunkTbl').innerHTML =
+  '<thead><tr><th>chunk</th><th class="n">pages</th><th class="n">upload</th><th class="n">submit</th>'+
+  '<th class="n">azure translate</th><th class="n">download</th><th class="n">chars</th><th>status</th></tr></thead><tbody>'+
+  chunkRows.map(r=>'<tr><td>chunk-'+r.i+(r.az===maxAz?' <span class="pill">critical</span>':'')+'</td>'+
+    '<td class="n">'+(r.pages??'-')+'</td><td class="n">'+fmtDur(r.up)+'</td><td class="n">'+fmtDur(r.sub)+'</td>'+
+    '<td class="n">'+fmtDur(r.az)+'</td><td class="n">'+fmtDur(r.dl)+'</td>'+
+    '<td class="n">'+(r.chars?r.chars.toLocaleString():'-')+'</td><td>'+esc(r.status||'-')+'</td></tr>').join('')+
+  '</tbody>';
+
+// ---- all spans table (sortable) ----
+let sortKey='t0', sortDir=1;
+function renderSpans(){
+  const rows=[...S].sort((a,b)=>{
+    const va=a[sortKey]??a.meta?.[sortKey]??0, vb=b[sortKey]??b.meta?.[sortKey]??0;
+    return (va>vb?1:va<vb?-1:0)*sortDir;
+  });
+  document.getElementById('spanTbl').innerHTML =
+    '<thead><tr>'+['thread','cat','name','t0','dur','meta'].map(h=>
+      '<th data-k="'+({t0:'t0',dur:'dur'}[h]||h)+'">'+h+'</th>').join('')+'</tr></thead><tbody>'+
+    rows.map(s=>'<tr><td>'+esc(s.thread)+'</td><td><span class="tag" style="background:'+COL[s.cat]+'"></span>'+
+      esc(s.cat)+'</td><td>'+esc(s.name)+'</td><td class="n">'+fmtClock(s.t0)+'</td>'+
+      '<td class="n">'+fmtDur(s.dur)+'</td><td style="color:var(--muted)">'+esc(metaStr(s.meta))+
+      (s.meta&&s.meta.error?' <span style="color:var(--azure)">'+esc(s.meta.error)+'</span>':'')+
+      '</td></tr>').join('')+'</tbody>';
+  document.querySelectorAll('#spanTbl th').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k; if(k===sortKey) sortDir*=-1; else {sortKey=k;sortDir=1;} renderSpans();
+  });
+}
+renderSpans();
+
+document.getElementById('foot').textContent =
+  'Faithful replica of the src/lib/batch.ts async split path (startPdfBatchJob -> getPdfJobStatus -> finishPdfBatchJob). '+
+  'Threads = the main pipeline plus one lane per parallel chunk job. Generated '+new Date(DATA.generatedAt).toLocaleString()+'.';
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+# This folder holds static assets served at the site root by Next.js.
+# It is intentionally kept (even if empty) so the Docker build's
+# `COPY /app/public ./public` step always succeeds.

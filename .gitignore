@@ -1,0 +1,86 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# ----------------------------------------------------------------------------
+# Secrets & environment
+# ----------------------------------------------------------------------------
+# Ignore every .env variant, but keep the documented template.
+.env*
+!.env.example
+
+# Azure Developer CLI environment state. `.azure/<env>/.env` holds real endpoints,
+# resource names and the subscription/tenant the environment is bound to.
+.azure/
+
+# Certificates, keys and publish profiles
+*.pem
+*.pfx
+*.p12
+*.key
+*.cer
+*.crt
+*.publishsettings
+local.settings.json
+appsettings.*.json
+
+# ----------------------------------------------------------------------------
+# Data — never commit input or output documents.
+# They routinely carry PII in content and in PDF/Office metadata
+# (author, employee id, organisation), and are rarely ours to redistribute.
+# ----------------------------------------------------------------------------
+/documents/
+/uploads/
+/output/
+/tmp/
+/test-data/
+/history/
+
+# ----------------------------------------------------------------------------
+# Agent / browser-automation scratch output
+# Playwright MCP writes console logs and full page accessibility dumps here,
+# which can capture authenticated portal sessions.
+# ----------------------------------------------------------------------------
+.playwright-mcp/
+
+# typescript
+*.tsbuildinfo
+
+# local test / evaluation outputs (generated, not source)
+/real-pdf-out.pdf
+/out.pdf
+/headers.txt
+/coverage
+
+# generated monitoring dashboard (snapshot artifact, not source)
+/monitoring-dashboard.html
+
+# optimization perf-test: keep report.html + trace.json as findings,
+# ignore the large merged validation PDFs (17-25 MB each)
+/optimization/results/**/output.pdf
+
+# generated decks and renders
+/presentation/render/
+
+# pdf.js worker copied from node_modules by the postinstall hook
+/public/pdf.worker.min.mjs

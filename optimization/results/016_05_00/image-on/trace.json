@@ -1,0 +1,458 @@
+{
+  "generatedAt": "2026-07-02T12:15:30.754Z",
+  "wallStart": "2026-07-02T12:12:05.781Z",
+  "config": {
+    "file": "016_05_00.pdf",
+    "label": "016_05_00",
+    "fileBytes": 1343794,
+    "pagesPerChunk": 3,
+    "imageText": true,
+    "apiVersion": "2026-03-01",
+    "to": "en",
+    "from": "ja",
+    "totalPages": 14,
+    "chunkCount": 5,
+    "charactersCharged": 15941,
+    "costUSD": 0.2391,
+    "outputBytes": 5084021,
+    "mergedPages": 14,
+    "pollRounds": 5,
+    "downloadSeqMs": 55809,
+    "downloadParMs": 90348,
+    "validPdf": true,
+    "endpoint": "https://cog-<token>.cognitiveservices.azure.com"
+  },
+  "spans": [
+    {
+      "thread": "total",
+      "cat": "total",
+      "name": "wall-clock",
+      "meta": {
+        "file": "016_05_00.pdf",
+        "pagesPerChunk": 3,
+        "imageText": true,
+        "apiVersion": "2026-03-01",
+        "to": "en",
+        "from": "ja",
+        "fileBytes": 1343794,
+        "totalPages": 14,
+        "chunkCount": 5,
+        "charactersCharged": 15941,
+        "outputBytes": 5084021,
+        "mergedPages": 14,
+        "failedChunks": 0,
+        "validPdf": true
+      },
+      "t0": 13.265200000000277,
+      "t1": 204972.7812,
+      "dur": 204959.516
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "read-file",
+      "meta": {},
+      "t0": 13.373700000000099,
+      "t1": 25.990600000000086,
+      "dur": 12.616899999999987
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "auth-token",
+      "meta": {},
+      "t0": 26.556500000000142,
+      "t1": 5948.262000000001,
+      "dur": 5921.7055
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "split-pdf",
+      "meta": {
+        "total": 14,
+        "chunkCount": 5
+      },
+      "t0": 5948.4503,
+      "t1": 6244.0187000000005,
+      "dur": 295.5684000000001
+    },
+    {
+      "thread": "main",
+      "cat": "task",
+      "name": "split p1-3",
+      "meta": {
+        "p0": 0,
+        "n": 3,
+        "bytes": 378531
+      },
+      "t0": 5986.4185,
+      "t1": 6068.5151000000005,
+      "dur": 82.09660000000076
+    },
+    {
+      "thread": "main",
+      "cat": "task",
+      "name": "split p4-6",
+      "meta": {
+        "p0": 3,
+        "n": 3,
+        "bytes": 272304
+      },
+      "t0": 6068.5949,
+      "t1": 6129.9432,
+      "dur": 61.348299999999654
+    },
+    {
+      "thread": "main",
+      "cat": "task",
+      "name": "split p7-9",
+      "meta": {
+        "p0": 6,
+        "n": 3,
+        "bytes": 566283
+      },
+      "t0": 6129.987300000001,
+      "t1": 6163.0821,
+      "dur": 33.09479999999894
+    },
+    {
+      "thread": "main",
+      "cat": "task",
+      "name": "split p10-12",
+      "meta": {
+        "p0": 9,
+        "n": 3,
+        "bytes": 393562
+      },
+      "t0": 6163.1546,
+      "t1": 6186.8385,
+      "dur": 23.683899999999994
+    },
+    {
+      "thread": "main",
+      "cat": "task",
+      "name": "split p13-14",
+      "meta": {
+        "p0": 12,
+        "n": 2,
+        "bytes": 217208
+      },
+      "t0": 6186.8809,
+      "t1": 6243.853000000001,
+      "dur": 56.972100000000864
+    },
+    {
+      "thread": "phase",
+      "cat": "phase",
+      "name": "A: submit (startPdfBatchJob)",
+      "meta": {},
+      "t0": 6245.130999999999,
+      "t1": 27882.572099999998,
+      "dur": 21637.441099999996
+    },
+    {
+      "thread": "chunk-0",
+      "cat": "task",
+      "name": "upload-blob",
+      "meta": {
+        "bytes": 378531,
+        "pages": 3
+      },
+      "t0": 6245.522800000001,
+      "t1": 25377.3954,
+      "dur": 19131.872600000002
+    },
+    {
+      "thread": "chunk-1",
+      "cat": "task",
+      "name": "upload-blob",
+      "meta": {
+        "bytes": 272304,
+        "pages": 3
+      },
+      "t0": 6248.171200000001,
+      "t1": 20862.7975,
+      "dur": 14614.6263
+    },
+    {
+      "thread": "chunk-2",
+      "cat": "task",
+      "name": "upload-blob",
+      "meta": {
+        "bytes": 566283,
+        "pages": 3
+      },
+      "t0": 6248.773300000001,
+      "t1": 26956.7123,
+      "dur": 20707.939
+    },
+    {
+      "thread": "chunk-3",
+      "cat": "task",
+      "name": "upload-blob",
+      "meta": {
+        "bytes": 393562,
+        "pages": 3
+      },
+      "t0": 6249.008100000001,
+      "t1": 19004.231200000002,
+      "dur": 12755.223100000001
+    },
+    {
+      "thread": "chunk-4",
+      "cat": "task",
+      "name": "upload-blob",
+      "meta": {
+        "bytes": 217208,
+        "pages": 2
+      },
+      "t0": 6249.1275000000005,
+      "t1": 23886.050799999997,
+      "dur": 17636.923299999995
+    },
+    {
+      "thread": "chunk-3",
+      "cat": "task",
+      "name": "submit-batch",
+      "meta": {
+        "pages": 3
+      },
+      "t0": 19004.251600000003,
+      "t1": 22313.692499999997,
+      "dur": 3309.440899999994
+    },
+    {
+      "thread": "chunk-1",
+      "cat": "task",
+      "name": "submit-batch",
+      "meta": {
+        "pages": 3
+      },
+      "t0": 20862.815300000002,
+      "t1": 22945.2851,
+      "dur": 2082.469799999999
+    },
+    {
+      "thread": "chunk-4",
+      "cat": "task",
+      "name": "submit-batch",
+      "meta": {
+        "pages": 2
+      },
+      "t0": 23886.0645,
+      "t1": 24879.345,
+      "dur": 993.2805000000008
+    },
+    {
+      "thread": "chunk-0",
+      "cat": "task",
+      "name": "submit-batch",
+      "meta": {
+        "pages": 3
+      },
+      "t0": 25377.4067,
+      "t1": 25926.975100000003,
+      "dur": 549.5684000000037
+    },
+    {
+      "thread": "chunk-2",
+      "cat": "task",
+      "name": "submit-batch",
+      "meta": {
+        "pages": 3
+      },
+      "t0": 26956.723599999998,
+      "t1": 27882.5481,
+      "dur": 925.8245000000024
+    },
+    {
+      "thread": "chunk-0",
+      "cat": "azure",
+      "name": "process-azure",
+      "meta": {
+        "pages": 3,
+        "status": "succeeded",
+        "chars": 2301
+      },
+      "t0": 27883.2929,
+      "t1": 49541.8721,
+      "dur": 21658.5792
+    },
+    {
+      "thread": "chunk-1",
+      "cat": "azure",
+      "name": "process-azure",
+      "meta": {
+        "pages": 3,
+        "status": "succeeded",
+        "chars": 3781
+      },
+      "t0": 27883.297599999998,
+      "t1": 39016.4484,
+      "dur": 11133.150800000003
+    },
+    {
+      "thread": "chunk-2",
+      "cat": "azure",
+      "name": "process-azure",
+      "meta": {
+        "pages": 3,
+        "status": "succeeded",
+        "chars": 5078
+      },
+      "t0": 27883.2995,
+      "t1": 56267.7598,
+      "dur": 28384.4603
+    },
+    {
+      "thread": "chunk-3",
+      "cat": "azure",
+      "name": "process-azure",
+      "meta": {
+        "pages": 3,
+        "status": "succeeded",
+        "chars": 2997
+      },
+      "t0": 27883.3013,
+      "t1": 39016.4809,
+      "dur": 11133.179600000003
+    },
+    {
+      "thread": "chunk-4",
+      "cat": "azure",
+      "name": "process-azure",
+      "meta": {
+        "pages": 2,
+        "status": "succeeded",
+        "chars": 1784
+      },
+      "t0": 27883.303099999997,
+      "t1": 39016.5405,
+      "dur": 11133.237400000005
+    },
+    {
+      "thread": "phase",
+      "cat": "phase",
+      "name": "B: poll (getPdfJobStatus)",
+      "meta": {
+        "rounds": 5
+      },
+      "t0": 27883.3143,
+      "t1": 56269.0017,
+      "dur": 28385.687400000003
+    },
+    {
+      "thread": "phase",
+      "cat": "phase",
+      "name": "C: download+merge (finishPdfBatchJob)",
+      "meta": {
+        "seqMs": 55809.4313,
+        "parMs": 90347.70730000001
+      },
+      "t0": 56269.016,
+      "t1": 203605.0508,
+      "dur": 147336.0348
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "download-sequential (/result today)",
+      "meta": {
+        "bytes": 6936225,
+        "chunks": 5
+      },
+      "t0": 56269.187900000004,
+      "t1": 112078.6192,
+      "dur": 55809.4313
+    },
+    {
+      "thread": "chunk-0",
+      "cat": "task",
+      "name": "download-blob",
+      "meta": {},
+      "t0": 56269.197,
+      "t1": 74540.1687,
+      "dur": 18270.971699999995
+    },
+    {
+      "thread": "chunk-1",
+      "cat": "task",
+      "name": "download-blob",
+      "meta": {},
+      "t0": 74540.19649999999,
+      "t1": 88671.17529999999,
+      "dur": 14130.978799999997
+    },
+    {
+      "thread": "chunk-2",
+      "cat": "task",
+      "name": "download-blob",
+      "meta": {},
+      "t0": 88671.2416,
+      "t1": 107965.72649999999,
+      "dur": 19294.484899999996
+    },
+    {
+      "thread": "chunk-3",
+      "cat": "task",
+      "name": "download-blob",
+      "meta": {},
+      "t0": 107965.7546,
+      "t1": 110059.5321,
+      "dur": 2093.7774999999965
+    },
+    {
+      "thread": "chunk-4",
+      "cat": "task",
+      "name": "download-blob",
+      "meta": {},
+      "t0": 110059.564,
+      "t1": 112078.3974,
+      "dur": 2018.8334000000032
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "download-parallel (proposed fix)",
+      "meta": {
+        "bytes": 6936225,
+        "chunks": 5
+      },
+      "t0": 112078.6414,
+      "t1": 202426.3487,
+      "dur": 90347.70730000001
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "merge-pdfs",
+      "meta": {
+        "count": 5
+      },
+      "t0": 202426.5922,
+      "t1": 203604.96670000002,
+      "dur": 1178.3745000000054
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "write-output",
+      "meta": {
+        "bytes": 5084021
+      },
+      "t0": 203621.53290000002,
+      "t1": 203651.53960000002,
+      "dur": 30.00669999999809
+    },
+    {
+      "thread": "main",
+      "cat": "activity",
+      "name": "cleanup-blobs",
+      "meta": {},
+      "t0": 203651.55120000002,
+      "t1": 204928.84050000002,
+      "dur": 1277.289300000004
+    }
+  ]
+}

@@ -1,0 +1,739 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.40.2.10011",
+      "templateHash": "11951485350624515528"
+    }
+  },
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "metadata": {
+        "description": "Name of the azd environment; used to derive the resource group and resource names."
+      }
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Primary location for all resources."
+      }
+    },
+    "principalId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Id of the user or service principal to grant data-plane access for local development. Defaults to the azd principal."
+      }
+    },
+    "principalType": {
+      "type": "string",
+      "defaultValue": "User",
+      "allowedValues": [
+        "User",
+        "ServicePrincipal"
+      ],
+      "metadata": {
+        "description": "Type of the principal: \"User\" for interactive azd, \"ServicePrincipal\" for CI."
+      }
+    },
+    "appUsername": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Username for the app sign-in gate. Required — set APP_USERNAME in the azd environment."
+      }
+    },
+    "appPassword": {
+      "type": "securestring",
+      "minLength": 12,
+      "metadata": {
+        "description": "Password for the app sign-in gate. Required — set APP_PASSWORD in the azd environment."
+      }
+    },
+    "authSecret": {
+      "type": "securestring",
+      "minLength": 32,
+      "metadata": {
+        "description": "Secret used to sign session cookies. Required — set AUTH_SECRET to a high-entropy random string (e.g. `openssl rand -base64 48`). Never derive it from deployment metadata."
+      }
+    },
+    "exemptStorageFromSecurityBaseline": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Opt-in: tag the storage account SecurityControl=Ignore to exempt it from an org security-baseline policy that force-disables public network access. Leave false unless you know your tenant needs it — prefer private endpoints."
+      }
+    }
+  },
+  "variables": {
+    "tags": {
+      "azd-env-name": "[parameters('environmentName')]"
+    },
+    "resourceToken": "[toLower(uniqueString(subscription().id, parameters('environmentName'), parameters('location')))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2024-03-01",
+      "name": "[format('rg-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "resources",
+      "resourceGroup": "[format('rg-{0}', parameters('environmentName'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "resourceToken": {
+            "value": "[variables('resourceToken')]"
+          },
+          "principalId": {
+            "value": "[parameters('principalId')]"
+          },
+          "principalType": {
+            "value": "[parameters('principalType')]"
+          },
+          "appUsername": {
+            "value": "[parameters('appUsername')]"
+          },
+          "appPassword": {
+            "value": "[parameters('appPassword')]"
+          },
+          "authSecret": {
+            "value": "[parameters('authSecret')]"
+          },
+          "exemptStorageFromSecurityBaseline": {
+            "value": "[parameters('exemptStorageFromSecurityBaseline')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "2920352967492718436"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Primary location for all resources."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Tags applied to every resource."
+              }
+            },
+            "resourceToken": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique token used to derive globally-unique resource names."
+              }
+            },
+            "principalId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Principal id to grant local-dev data-plane access (optional)."
+              }
+            },
+            "principalType": {
+              "type": "string",
+              "defaultValue": "User",
+              "metadata": {
+                "description": "Type of the principal granted local-dev access."
+              }
+            },
+            "appUsername": {
+              "type": "string",
+              "metadata": {
+                "description": "Username for the app sign-in gate."
+              }
+            },
+            "appPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Password for the app sign-in gate (stored as a Container App secret)."
+              }
+            },
+            "authSecret": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Secret used to sign app session cookies (stored as a Container App secret)."
+              }
+            },
+            "exemptStorageFromSecurityBaseline": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Opt-in: tag the storage account SecurityControl=Ignore to exempt it from an org security-baseline policy that force-disables public network access. Leave false unless you know your tenant needs it — prefer private endpoints."
+              }
+            }
+          },
+          "variables": {
+            "abbrs": {
+              "containerRegistry": "cr",
+              "containerAppsEnv": "cae",
+              "containerApp": "ca",
+              "logAnalytics": "log",
+              "applicationInsights": "appi",
+              "managedIdentity": "id",
+              "cognitiveServices": "cog",
+              "storageAccount": "st"
+            },
+            "roles": {
+              "cognitiveServicesUser": "a97b65f3-24c7-4388-baec-2e87135dc908",
+              "storageBlobDataContributor": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+              "acrPull": "7f951dda-4ed3-4680-a7ca-43fe172d538d"
+            },
+            "sourceContainerName": "source",
+            "targetContainerName": "target",
+            "placeholderImage": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}/{2}', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')), 'default', variables('sourceContainerName'))]",
+              "properties": {
+                "publicAccess": "None"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')), 'default')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}/{2}', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')), 'default', variables('targetContainerName'))]",
+              "properties": {
+                "publicAccess": "None"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')), 'default')]"
+              ]
+            },
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            },
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[format('{0}-{1}', variables('abbrs').logAnalytics, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "retentionInDays": 30,
+                "sku": {
+                  "name": "PerGB2018"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[format('{0}-{1}', variables('abbrs').applicationInsights, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "web",
+              "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', format('{0}-{1}', variables('abbrs').logAnalytics, parameters('resourceToken')))]",
+                "IngestionMode": "LogAnalytics"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', format('{0}-{1}', variables('abbrs').logAnalytics, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ContainerRegistry/registries",
+              "apiVersion": "2023-11-01-preview",
+              "name": "[format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "Basic"
+              },
+              "properties": {
+                "adminUserEnabled": false
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.ContainerRegistry/registries', format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken')))]",
+              "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken'))), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), variables('roles').acrPull)]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').acrPull)]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.ContainerRegistry/registries', format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "CognitiveServices",
+              "sku": {
+                "name": "S0"
+              },
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "customSubDomainName": "[format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))]",
+                "publicNetworkAccess": "Enabled",
+                "disableLocalAuth": true
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[if(parameters('exemptStorageFromSecurityBaseline'), union(parameters('tags'), createObject('SecurityControl', 'Ignore')), parameters('tags'))]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "StorageV2",
+              "properties": {
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": false,
+                "minimumTlsVersion": "TLS1_2",
+                "publicNetworkAccess": "Enabled",
+                "supportsHttpsTrafficOnly": true
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')), 'default')]",
+              "properties": {
+                "deleteRetentionPolicy": {
+                  "enabled": false
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+              "apiVersion": "2023-05-01",
+              "name": "[format('{0}/{1}', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')), 'default')]",
+              "properties": {
+                "policy": {
+                  "rules": [
+                    {
+                      "name": "expire-translation-blobs",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "filters": {
+                          "blobTypes": [
+                            "blockBlob"
+                          ],
+                          "prefixMatch": [
+                            "[format('{0}/', variables('sourceContainerName'))]",
+                            "[format('{0}/', variables('targetContainerName'))]"
+                          ]
+                        },
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 1
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), variables('roles').storageBlobDataContributor)]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').storageBlobDataContributor)]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))), resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), variables('roles').storageBlobDataContributor)]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').storageBlobDataContributor)]",
+                "principalId": "[reference(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), '2024-10-01', 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]",
+              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), variables('roles').cognitiveServicesUser)]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').cognitiveServicesUser)]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "condition": "[not(empty(parameters('principalId')))]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]",
+              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), parameters('principalId'), variables('roles').cognitiveServicesUser)]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').cognitiveServicesUser)]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "[parameters('principalType')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "condition": "[not(empty(parameters('principalId')))]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]",
+              "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))), parameters('principalId'), variables('roles').storageBlobDataContributor)]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').storageBlobDataContributor)]",
+                "principalId": "[parameters('principalId')]",
+                "principalType": "[parameters('principalType')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.App/managedEnvironments",
+              "apiVersion": "2024-03-01",
+              "name": "[format('{0}-{1}', variables('abbrs').containerAppsEnv, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "appLogsConfiguration": {
+                  "destination": "log-analytics",
+                  "logAnalyticsConfiguration": {
+                    "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', format('{0}-{1}', variables('abbrs').logAnalytics, parameters('resourceToken'))), '2023-09-01').customerId]",
+                    "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', format('{0}-{1}', variables('abbrs').logAnalytics, parameters('resourceToken'))), '2023-09-01').primarySharedKey]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', format('{0}-{1}', variables('abbrs').logAnalytics, parameters('resourceToken')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2024-03-01",
+              "name": "[format('{0}-web-{1}', variables('abbrs').containerApp, parameters('resourceToken'))]",
+              "location": "[parameters('location')]",
+              "tags": "[union(parameters('tags'), createObject('azd-service-name', 'web'))]",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))))]": {}
+                }
+              },
+              "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', format('{0}-{1}', variables('abbrs').containerAppsEnv, parameters('resourceToken')))]",
+                "configuration": {
+                  "activeRevisionsMode": "Single",
+                  "secrets": [
+                    {
+                      "name": "app-password",
+                      "value": "[parameters('appPassword')]"
+                    },
+                    {
+                      "name": "auth-secret",
+                      "value": "[parameters('authSecret')]"
+                    }
+                  ],
+                  "ingress": {
+                    "external": true,
+                    "targetPort": 3000,
+                    "transport": "auto",
+                    "allowInsecure": false
+                  },
+                  "registries": [
+                    {
+                      "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken'))), '2023-11-01-preview').loginServer]",
+                      "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken')))]"
+                    }
+                  ]
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "name": "web",
+                      "image": "[variables('placeholderImage')]",
+                      "resources": {
+                        "cpu": "[json('0.5')]",
+                        "memory": "1.0Gi"
+                      },
+                      "env": [
+                        {
+                          "name": "AZURE_CLIENT_ID",
+                          "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken'))), '2023-01-31').clientId]"
+                        },
+                        {
+                          "name": "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT",
+                          "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), '2024-10-01').endpoint]"
+                        },
+                        {
+                          "name": "AZURE_DOCUMENT_TRANSLATION_ENDPOINT",
+                          "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), '2024-10-01').endpoint]"
+                        },
+                        {
+                          "name": "AZURE_TRANSLATOR_REGION",
+                          "value": "[parameters('location')]"
+                        },
+                        {
+                          "name": "AZURE_TRANSLATOR_RESOURCE_ID",
+                          "value": "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]"
+                        },
+                        {
+                          "name": "AZURE_STORAGE_ACCOUNT_NAME",
+                          "value": "[format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))]"
+                        },
+                        {
+                          "name": "AZURE_STORAGE_BLOB_ENDPOINT",
+                          "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))), '2023-05-01').primaryEndpoints.blob]"
+                        },
+                        {
+                          "name": "AZURE_STORAGE_SOURCE_CONTAINER",
+                          "value": "[variables('sourceContainerName')]"
+                        },
+                        {
+                          "name": "AZURE_STORAGE_TARGET_CONTAINER",
+                          "value": "[variables('targetContainerName')]"
+                        },
+                        {
+                          "name": "EVALUATION_ENABLED",
+                          "value": "true"
+                        },
+                        {
+                          "name": "APP_USERNAME",
+                          "value": "[parameters('appUsername')]"
+                        },
+                        {
+                          "name": "APP_PASSWORD",
+                          "secretRef": "app-password"
+                        },
+                        {
+                          "name": "AUTH_SECRET",
+                          "secretRef": "auth-secret"
+                        },
+                        {
+                          "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                          "value": "[reference(resourceId('Microsoft.Insights/components', format('{0}-{1}', variables('abbrs').applicationInsights, parameters('resourceToken'))), '2020-02-02').ConnectionString]"
+                        },
+                        {
+                          "name": "OTEL_SERVICE_NAME",
+                          "value": "doc-translator"
+                        }
+                      ]
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": 0,
+                    "maxReplicas": 3
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-{1}', variables('abbrs').managedIdentity, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.Insights/components', format('{0}-{1}', variables('abbrs').applicationInsights, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.App/managedEnvironments', format('{0}-{1}', variables('abbrs').containerAppsEnv, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.ContainerRegistry/registries', format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken')))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken')))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "AZURE_CONTAINER_REGISTRY_ENDPOINT": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken'))), '2023-11-01-preview').loginServer]"
+            },
+            "AZURE_CONTAINER_REGISTRY_NAME": {
+              "type": "string",
+              "value": "[format('{0}{1}', variables('abbrs').containerRegistry, parameters('resourceToken'))]"
+            },
+            "SERVICE_WEB_NAME": {
+              "type": "string",
+              "value": "[format('{0}-web-{1}', variables('abbrs').containerApp, parameters('resourceToken'))]"
+            },
+            "SERVICE_WEB_URI": {
+              "type": "string",
+              "value": "[format('https://{0}', reference(resourceId('Microsoft.App/containerApps', format('{0}-web-{1}', variables('abbrs').containerApp, parameters('resourceToken'))), '2024-03-01').configuration.ingress.fqdn)]"
+            },
+            "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), '2024-10-01').endpoint]"
+            },
+            "AZURE_DOCUMENT_TRANSLATION_ENDPOINT": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken'))), '2024-10-01').endpoint]"
+            },
+            "AZURE_TRANSLATOR_REGION": {
+              "type": "string",
+              "value": "[parameters('location')]"
+            },
+            "AZURE_TRANSLATOR_RESOURCE_ID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts', format('{0}-{1}', variables('abbrs').cognitiveServices, parameters('resourceToken')))]"
+            },
+            "AZURE_STORAGE_ACCOUNT_NAME": {
+              "type": "string",
+              "value": "[format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))]"
+            },
+            "AZURE_STORAGE_BLOB_ENDPOINT": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', variables('abbrs').storageAccount, parameters('resourceToken'))), '2023-05-01').primaryEndpoints.blob]"
+            },
+            "AZURE_STORAGE_SOURCE_CONTAINER": {
+              "type": "string",
+              "value": "[variables('sourceContainerName')]"
+            },
+            "AZURE_STORAGE_TARGET_CONTAINER": {
+              "type": "string",
+              "value": "[variables('targetContainerName')]"
+            },
+            "APPLICATIONINSIGHTS_CONNECTION_STRING": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', format('{0}-{1}', variables('abbrs').applicationInsights, parameters('resourceToken'))), '2020-02-02').ConnectionString]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', format('rg-{0}', parameters('environmentName')))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "AZURE_LOCATION": {
+      "type": "string",
+      "value": "[parameters('location')]"
+    },
+    "AZURE_TENANT_ID": {
+      "type": "string",
+      "value": "[tenant().tenantId]"
+    },
+    "AZURE_RESOURCE_GROUP": {
+      "type": "string",
+      "value": "[format('rg-{0}', parameters('environmentName'))]"
+    },
+    "AZURE_CONTAINER_REGISTRY_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT.value]"
+    },
+    "AZURE_CONTAINER_REGISTRY_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_CONTAINER_REGISTRY_NAME.value]"
+    },
+    "SERVICE_WEB_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.SERVICE_WEB_NAME.value]"
+    },
+    "SERVICE_WEB_URI": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.SERVICE_WEB_URI.value]"
+    },
+    "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT.value]"
+    },
+    "AZURE_DOCUMENT_TRANSLATION_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_DOCUMENT_TRANSLATION_ENDPOINT.value]"
+    },
+    "AZURE_TRANSLATOR_REGION": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_TRANSLATOR_REGION.value]"
+    },
+    "AZURE_TRANSLATOR_RESOURCE_ID": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_TRANSLATOR_RESOURCE_ID.value]"
+    },
+    "AZURE_STORAGE_ACCOUNT_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_STORAGE_ACCOUNT_NAME.value]"
+    },
+    "AZURE_STORAGE_BLOB_ENDPOINT": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_STORAGE_BLOB_ENDPOINT.value]"
+    },
+    "AZURE_STORAGE_SOURCE_CONTAINER": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_STORAGE_SOURCE_CONTAINER.value]"
+    },
+    "AZURE_STORAGE_TARGET_CONTAINER": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.AZURE_STORAGE_TARGET_CONTAINER.value]"
+    },
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'resources'), '2025-04-01').outputs.APPLICATIONINSIGHTS_CONNECTION_STRING.value]"
+    }
+  }
+}
